@@ -1,0 +1,25 @@
+#!/bin/env python
+
+bld.program(target='test_block',
+  source = bld.path.ant_glob('block/**/*.cpp'),
+  use = ['catch', 'hx'])
+
+bld.program(target='test_field_rijndael',
+  source = bld.path.ant_glob('field/rijndael/**/*.cpp'),
+  use = ['catch', 'hx'])
+
+bld.program(target='test_split',
+  source = bld.path.ant_glob('split/**/*.cpp'),
+  use = ['catch', 'hx'])
+
+bld.program(target='test_headers',
+  source = bld.path.ant_glob('headers/**/*.cpp'),
+  use = ['catch', 'hx'])
+
+bld.program(target='test_splitter',
+  source = bld.path.ant_glob('splitter/**/*.cpp'),
+  use = ['catch', 'hx'])
+
+bld.program(target='test_joiner',
+  source = bld.path.ant_glob('joiner/**/*.cpp'),
+  use = ['catch', 'hx'])
