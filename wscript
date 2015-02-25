@@ -9,9 +9,11 @@ def options(opt):
   opt.add_option('--test', action='store', default='*', dest='test')
 
 def configure(conf):
+  # see wscript_configure
   pass
 
 def build(bld):
+  # see wscript_build
   pass
 
 def test(ctx):

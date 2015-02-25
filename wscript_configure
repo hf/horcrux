@@ -2,4 +2,4 @@
 
 conf.load('compiler_cxx')
 
-conf.check_cxx(header_name='boost/smart_ptr.hpp', mandatory=True)
+conf.recurse('vendor hx tests')

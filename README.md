@@ -1,8 +1,21 @@
 # Horcrux
 
 Horcrux is a C++ library which uses M.O. Rabin's Information Dispersal Algorithm
-to split a block of bytes into `n` pieces, such that the block can be
-recovered from any subset of `m` pieces (`1 <= m <= n`).
+to split a block of bytes into *n* pieces, such that the block can be
+recovered from any subset of *m* pieces.
+
+## Usage
+
+Horcrux uses [waf](https://code.google.com/p/waf/) to build itself. Assuming
+you use waf also, just recurse into this source directory such as:
+
+```python
+def configure(conf):
+  conf.recurse('horcrux')
+
+def build(bld):
+  bld.recurse('horcrux')
+```
 
 ## License
 
