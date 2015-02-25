@@ -9,12 +9,10 @@ def options(opt):
   opt.add_option('--test', action='store', default='*', dest='test')
 
 def configure(conf):
-  conf.load('compiler_cxx')
-
-  conf.check_cxx(header_name='boost/smart_ptr.hpp', mandatory=True)
+  pass
 
 def build(bld):
-  bld.recurse('vendor hx tests')
+  pass
 
 def test(ctx):
   print
