@@ -10,6 +10,7 @@ using namespace std;
 TEST_CASE ("Rijndael field should be defined properly.", "[hx::Field::Rijndael]") {
   REQUIRE (hx::Field::Rijndael::ORDER == 256);
   REQUIRE (hx::Field::Rijndael::WIDTH == 1);
+  REQUIRE (hx::Field::Rijndael::IRREDUCIBLE == 0x1B);
 }
 
 TEST_CASE ("Rijndael field should add / subtract correctly.", "[hx::Field::Rijndael]") {
