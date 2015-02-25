@@ -51,11 +51,11 @@ public:
     unsigned char carry = 0;
 
     for (int i = 0; i < 8; i++) {
-      if (b & 1) { p ^= a; }
+      p ^= (b & 1) * a; //if (b & 1) { p ^= a; }
       b >>= 1;
-      carry = a & 0x80;
+      carry = a >> 7; //carry = a & 0x80;
       a <<= 1;
-      if (carry) { a ^= 0x1B; }
+      a ^= carry * 0x1B; // if (carry) { a ^= 0x1B; }
     }
 
     *out = (char) p;
