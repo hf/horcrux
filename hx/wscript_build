@@ -2,4 +2,5 @@
 
 bld.shlib(target='hx',
   export_includes='.',
+  use=['galois'],
   source=bld.path.ant_glob('**/*.cpp'))

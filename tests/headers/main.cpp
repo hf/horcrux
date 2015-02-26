@@ -2,8 +2,9 @@
 
 #include <catch.hpp>
 
+#include <galois/field/rijndael.hpp>
+
 #include <hx/split.hpp>
-#include <hx/field/rijndael.hpp>
 #include <hx/headers/cauchy.hpp>
 #include <hx/block.hpp>
 
@@ -60,33 +61,33 @@ static void CheckInverted(const hx::Block<>& a, const hx::Block<>& b) {
 }
 
 TEST_CASE ("Cauchy headers should initialize properly.", "[hx::Headers::Cauchy]") {
-  REQUIRE (hx::Headers::Cauchy< hx::Split<hx::Field::Rijndael> >::WillConstructHeaders(hx::Split<hx::Field::Rijndael>(251, 5)) == false);
+  REQUIRE (hx::Headers::Cauchy< hx::Split<galois::Field::Rijndael> >::WillConstructHeaders(hx::Split<galois::Field::Rijndael>(251, 5)) == false);
 
-  hx::Headers::Cauchy< hx::Split<hx::Field::Rijndael> > a(hx::Split<hx::Field::Rijndael>(5, 3));
+  hx::Headers::Cauchy< hx::Split<galois::Field::Rijndael> > a(hx::Split<galois::Field::Rijndael>(5, 3));
 
   REQUIRE (a.IsInvertible() == false);
 
-  hx::Split<hx::Field::Rijndael> split = a.Split();
+  hx::Split<galois::Field::Rijndael> split = a.Split();
 
   REQUIRE (split.Pieces() == 5);
   REQUIRE (split.Quorum() == 3);
 }
 
 TEST_CASE ("Cauchy headers should generate properly.", "[hx::Headers::Cauchy]") {
-  hx::Headers::Cauchy< hx::Split<hx::Field::Rijndael> > a(hx::Split<hx::Field::Rijndael>(5, 3));
+  hx::Headers::Cauchy< hx::Split<galois::Field::Rijndael> > a(hx::Split<galois::Field::Rijndael>(5, 3));
 
-  REQUIRE (a.OutputSize() == 5 * 3 * hx::Field::Rijndael::WIDTH);
+  REQUIRE (a.OutputSize() == 5 * 3 * galois::Field::Rijndael::WIDTH);
 
   char ahd[a.OutputSize()];
 
   hx::Block<> aheaders = a.Generate(hx::Block<>(ahd, a.OutputSize()));
 
   REQUIRE (aheaders.Elements() == 5);
-  REQUIRE (aheaders.Width() == 3 * hx::Field::Rijndael::WIDTH);
+  REQUIRE (aheaders.Width() == 3 * galois::Field::Rijndael::WIDTH);
 }
 
 TEST_CASE ("Cauchy headers should invert properly.", "[hx::Headers::Cauchy]") {
-  hx::Headers::Cauchy< hx::Split<hx::Field::Rijndael> > b(hx::Split<hx::Field::Rijndael>(5, 5));
+  hx::Headers::Cauchy< hx::Split<galois::Field::Rijndael> > b(hx::Split<galois::Field::Rijndael>(5, 5));
 
   REQUIRE (b.IsInvertible() == true);
 
@@ -95,13 +96,13 @@ TEST_CASE ("Cauchy headers should invert properly.", "[hx::Headers::Cauchy]") {
   hx::Block<> bheaders = b.Generate(hx::Block<>(bhd, b.OutputSize()));
 
   REQUIRE (bheaders.Elements() == 5);
-  REQUIRE (bheaders.Width() == 5 * hx::Field::Rijndael::WIDTH);
+  REQUIRE (bheaders.Width() == 5 * galois::Field::Rijndael::WIDTH);
 
   char ibhd[b.OutputSize()];
 
   hx::Block<> ibheaders = b.Invert(bheaders, hx::Block<>(ibhd, b.OutputSize()));
 
-  CheckInverted< hx::Field::Rijndael >(bheaders, ibheaders);
+  CheckInverted< galois::Field::Rijndael >(bheaders, ibheaders);
 }
 
 

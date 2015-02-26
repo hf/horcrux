@@ -4,10 +4,6 @@ bld.program(target='test_block',
   source = bld.path.ant_glob('block/**/*.cpp'),
   use = ['catch', 'hx'])
 
-bld.program(target='test_field_rijndael',
-  source = bld.path.ant_glob('field/rijndael/**/*.cpp'),
-  use = ['catch', 'hx'])
-
 bld.program(target='test_split',
   source = bld.path.ant_glob('split/**/*.cpp'),
   use = ['catch', 'hx'])

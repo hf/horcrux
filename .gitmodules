@@ -1,0 +1,3 @@
+[submodule "vendor/galois"]
+	path = vendor/galois
+	url = git@github.com:hf/galois.git
