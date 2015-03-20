@@ -1,3 +1,5 @@
+// Under PUBLIC DOMAIN.
+
 #pragma once
 
 #include <cstddef>
