@@ -1,0 +1,13 @@
+#!/bin/env python
+
+def options(opt):
+  opt.recurse('galois cuprum')
+
+def configure(conf):
+  conf.recurse('galois cuprum')
+
+def build(bld):
+  bld(name='catch',
+    export_includes='catch')
+
+  bld.recurse('galois cuprum')

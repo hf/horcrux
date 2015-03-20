@@ -1,6 +1,6 @@
-[submodule "vendor/galois"]
-	path = vendor/galois
-	url = git@github.com:hf/galois.git
-[submodule "vendor/cuprum"]
-	path = vendor/cuprum
+[submodule "tests/vendor/cuprum"]
+	path = tests/vendor/cuprum
 	url = git@github.com:hf/cuprum.git
+[submodule "tests/vendor/galois"]
+	path = tests/vendor/galois
+	url = git@github.com:hf/galois.git

@@ -26,7 +26,7 @@ TEST_CASE ("Splitter should split.", "[hx::Splitter]") {
 
   char hdata[hdata_s];
 
-  hx::Block<> headers = cauchy.Generate(hx::Block<>(hdata, hdata_s));
+  cu::Block<> headers = cauchy.Generate(cu::Block<>(hdata, hdata_s));
 
   hx::Splitter< hx::Split< galois::Field::Rijndael > > splitter(split);
 
@@ -36,7 +36,7 @@ TEST_CASE ("Splitter should split.", "[hx::Splitter]") {
   char data[data_s];
   char out[out_s];
 
-  hx::Block<> result = splitter.Split(headers, hx::Block<>(data, data_s), hx::Block<>(out, out_s));
+  cu::Block<> result = splitter.Split(headers, cu::Block<>(data, data_s), cu::Block<>(out, out_s));
 
   REQUIRE (result.Elements() == split.Pieces());
   REQUIRE (result.Width() == splitter.PieceSize(data_s));

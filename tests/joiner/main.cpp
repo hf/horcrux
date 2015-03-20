@@ -3,12 +3,12 @@
 #include <catch.hpp>
 
 #include <galois/field/rijndael.hpp>
+#include <cu/block.hpp>
 
 #include <hx/split.hpp>
 #include <hx/headers/cauchy.hpp>
 #include <hx/splitter.hpp>
 #include <hx/joiner.hpp>
-#include <hx/block.hpp>
 
 TEST_CASE ("Joiner should initialize properly.", "[hx::Joiner]") {
   hx::Joiner< galois::Field::Rijndael > joiner(10);
@@ -28,7 +28,7 @@ TEST_CASE ("Joiner should join previously split data.", "[hx::Joiner]") {
 
   char hdata[hdata_s];
 
-  hx::Block<> headers = cauchy.Generate(hx::Block<>(hdata, hdata_s));
+  cu::Block<> headers = cauchy.Generate(cu::Block<>(hdata, hdata_s));
 
   hx::Splitter< hx::Split< galois::Field::Rijndael > > splitter(split);
 
@@ -44,7 +44,7 @@ TEST_CASE ("Joiner should join previously split data.", "[hx::Joiner]") {
     field.Value(i % galois::Field::Rijndael::ORDER, data + i);
   }
 
-  hx::Block<> pieces = splitter.Split(headers, hx::Block<>(data, data_s), hx::Block<>(out, out_s));
+  cu::Block<> pieces = splitter.Split(headers, cu::Block<>(data, data_s), cu::Block<>(out, out_s));
 
   hx::Joiner< galois::Field::Rijndael > joiner(split.Quorum());
 
@@ -52,8 +52,8 @@ TEST_CASE ("Joiner should join previously split data.", "[hx::Joiner]") {
 
   char ihdata[joiner_cauchy.OutputSize()];
 
-  hx::Block<> joiner_inverted_headers = joiner_cauchy.Invert(headers.Range(0, split.Quorum()), hx::Block<>(ihdata, joiner_cauchy.OutputSize()));
-  hx::Block<> joiner_pieces = pieces.Range(0, split.Quorum());
+  cu::Block<> joiner_inverted_headers = joiner_cauchy.Invert(headers.Range(0, split.Quorum()), cu::Block<>(ihdata, joiner_cauchy.OutputSize()));
+  cu::Block<> joiner_pieces = pieces.Range(0, split.Quorum());
 
   REQUIRE (joiner_pieces.Size() == data_s);
 
@@ -61,7 +61,7 @@ TEST_CASE ("Joiner should join previously split data.", "[hx::Joiner]") {
 
   char jdata[jdata_s];
 
-  hx::Block<> joined = joiner.Join(joiner_inverted_headers, joiner_pieces, hx::Block<>(jdata, jdata_s));
+  cu::Block<> joined = joiner.Join(joiner_inverted_headers, joiner_pieces, cu::Block<>(jdata, jdata_s));
 
   REQUIRE (joined.Elements() == data_s / galois::Field::Rijndael::WIDTH);
   REQUIRE (joined.Width() == galois::Field::Rijndael::WIDTH);

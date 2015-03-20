@@ -1,0 +1,26 @@
+#!/bin/env python
+
+def options(opt):
+  opt.recurse('vendor')
+
+def configure(conf):
+  conf.recurse('vendor')
+
+def build(bld):
+  bld.recurse('vendor')
+
+  bld.program(target='test_split',
+    source = bld.path.ant_glob('split/**/*.cpp'),
+    use = ['catch', 'galois', 'cu', 'hx'])
+
+  bld.program(target='test_headers',
+    source = bld.path.ant_glob('headers/**/*.cpp'),
+    use = ['catch', 'galois', 'cu', 'hx'])
+
+  bld.program(target='test_splitter',
+    source = bld.path.ant_glob('splitter/**/*.cpp'),
+    use = ['catch', 'galois', 'cu', 'hx'])
+
+  bld.program(target='test_joiner',
+    source = bld.path.ant_glob('joiner/**/*.cpp'),
+    use = ['catch', 'galois', 'cu', 'hx'])

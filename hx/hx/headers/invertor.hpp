@@ -3,14 +3,14 @@
 #include <cstddef>
 #include <cassert>
 
-using namespace std;
+#include <cu/block.hpp>
 
-#include "../block.hpp"
+using namespace std;
 
 namespace hx {
 namespace Headers {
 
-template <typename SPLIT, typename DATA = BLOCK_DEFAULT_DATA_TYPE>
+template <typename SPLIT, typename DATA = CU_BLOCK_DEFAULT_DATA_TYPE>
 class Invertor {
 private:
   const SPLIT split;
@@ -43,24 +43,24 @@ public:
     return split.Pieces() * split.Quorum() * FieldWidth();
   }
 
-  Block<DATA> Invert(const Block<DATA>&, const Block<DATA>&, bool* const) const;
+  cu::Block<DATA> Invert(const cu::Block<DATA>&, const cu::Block<DATA>&, bool* const) const;
 };
 
 template <typename SPLIT, typename DATA>
-Block<DATA> Invertor<SPLIT, DATA>::Invert(const Block<DATA>& hdrs, const Block<DATA>& out, bool* const inverted) const {
+cu::Block<DATA> Invertor<SPLIT, DATA>::Invert(const cu::Block<DATA>& hdrs, const cu::Block<DATA>& out, bool* const inverted) const {
   assert (hdrs.Size() == OutputSize());
   assert (out.Size() == OutputSize());
 
-  Block<DATA> headers = hdrs.Recast(split.Quorum() * FieldWidth());
-  Block<DATA> output = out.Recast(split.Quorum() * FieldWidth());
+  cu::Block<DATA> headers = hdrs.Recast(split.Quorum() * FieldWidth());
+  cu::Block<DATA> output = out.Recast(split.Quorum() * FieldWidth());
 
   assert (headers.Elements() == split.Pieces());
 
   char left_data[headers.Size()];
   char right_data[headers.Size()];
 
-  Block<DATA> left = Block<DATA>(left_data, headers.Size()).Recast(split.Quorum() * FieldWidth());
-  Block<DATA> right = Block<DATA>(right_data, headers.Size()).Recast(split.Quorum() * FieldWidth());
+  cu::Block<DATA> left = cu::Block<DATA>(left_data, headers.Size()).Recast(split.Quorum() * FieldWidth());
+  cu::Block<DATA> right = cu::Block<DATA>(right_data, headers.Size()).Recast(split.Quorum() * FieldWidth());
 
   assert (left.Elements() == split.Pieces());
   assert (right.Elements() == split.Pieces());
@@ -77,7 +77,7 @@ Block<DATA> Invertor<SPLIT, DATA>::Invert(const Block<DATA>& hdrs, const Block<D
 
   // identity matrix
   for (size_t i = 0; i < right.Elements(); i++) {
-    Block<DATA> row = right.Sub(i, FieldWidth());
+    cu::Block<DATA> row = right.Sub(i, FieldWidth());
 
     assert (row.Elements() == split.Quorum());
 
@@ -93,8 +93,8 @@ Block<DATA> Invertor<SPLIT, DATA>::Invert(const Block<DATA>& hdrs, const Block<D
     size_t pivot = k;
 
     for (size_t i = k; i < split.Pieces(); i++) {
-      Block<DATA> prow = left.Sub(pivot, FieldWidth());
-      Block<DATA> irow = left.Sub(i, FieldWidth());
+      cu::Block<DATA> prow = left.Sub(pivot, FieldWidth());
+      cu::Block<DATA> irow = left.Sub(i, FieldWidth());
 
       if (field.Compare(irow(k), prow(k)) > 0) {
         pivot = i;
@@ -106,11 +106,11 @@ Block<DATA> Invertor<SPLIT, DATA>::Invert(const Block<DATA>& hdrs, const Block<D
     right.Exchange(pivot, k);
     left.Exchange(pivot, k);
 
-    Block<DATA> lk = left.Sub(k, FieldWidth());
-    Block<DATA> rk = right.Sub(k, FieldWidth());
+    cu::Block<DATA> lk = left.Sub(k, FieldWidth());
+    cu::Block<DATA> rk = right.Sub(k, FieldWidth());
 
     for (size_t i = k + 1; i < split.Pieces(); i++) {
-      Block<DATA> li = left.Sub(i, FieldWidth());
+      cu::Block<DATA> li = left.Sub(i, FieldWidth());
 
       // left
       for (size_t j = k + 1; j < split.Quorum(); j++) {
@@ -119,7 +119,7 @@ Block<DATA> Invertor<SPLIT, DATA>::Invert(const Block<DATA>& hdrs, const Block<D
         field.Sub(li(j), intermediate, li(j));
       }
 
-      Block<DATA> ri = right.Sub(i, FieldWidth());
+      cu::Block<DATA> ri = right.Sub(i, FieldWidth());
 
       // right
       for (size_t j = 0; j < split.Quorum(); j++) {
@@ -133,8 +133,8 @@ Block<DATA> Invertor<SPLIT, DATA>::Invert(const Block<DATA>& hdrs, const Block<D
   }
 
   for (long long int i = split.Pieces() - 1; i >= 0; i--) {
-    Block<DATA> li = left.Sub(i, FieldWidth());
-    Block<DATA> ri = right.Sub(i, FieldWidth());
+    cu::Block<DATA> li = left.Sub(i, FieldWidth());
+    cu::Block<DATA> ri = right.Sub(i, FieldWidth());
 
     for (long long int j = split.Quorum() - 1; j >= 0; j--) {
       field.Div(ri(j), li(i), ri(j));
@@ -148,15 +148,15 @@ Block<DATA> Invertor<SPLIT, DATA>::Invert(const Block<DATA>& hdrs, const Block<D
   char rem[FieldWidth()];
 
   for (long long int i = split.Pieces() - 2; i >= 0; i--) {
-    Block<DATA> li = left.Sub(i, FieldWidth());
-    Block<DATA> ri = right.Sub(i, FieldWidth());
+    cu::Block<DATA> li = left.Sub(i, FieldWidth());
+    cu::Block<DATA> ri = right.Sub(i, FieldWidth());
 
     for (size_t k = i + 1; k < split.Quorum(); k++) {
       field.Value(0, rem);
       field.Add(rem, li(k), rem);
 
-      Block<DATA> lk = left.Sub(k, FieldWidth());
-      Block<DATA> rk = right.Sub(k, FieldWidth());
+      cu::Block<DATA> lk = left.Sub(k, FieldWidth());
+      cu::Block<DATA> rk = right.Sub(k, FieldWidth());
 
       for (long long int j = split.Quorum() - 1; j >= 0; j--) {
         field.Mul(rem, rk(j), intermediate);
@@ -177,7 +177,7 @@ Block<DATA> Invertor<SPLIT, DATA>::Invert(const Block<DATA>& hdrs, const Block<D
   field.Value(0, zero);
 
   for (size_t i = 0; i < split.Pieces(); i++) {
-    Block<DATA> irow = left.Sub(i, FieldWidth());
+    cu::Block<DATA> irow = left.Sub(i, FieldWidth());
 
     assert (field.Compare(irow(i), one) == 0);
 

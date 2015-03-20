@@ -3,13 +3,13 @@
 #include <catch.hpp>
 
 #include <galois/field/rijndael.hpp>
+#include <cu/block.hpp>
 
 #include <hx/split.hpp>
 #include <hx/headers/cauchy.hpp>
-#include <hx/block.hpp>
 
 template <typename FIELD>
-static void CheckInverted(const hx::Block<>& a, const hx::Block<>& b) {
+static void CheckInverted(const cu::Block<>& a, const cu::Block<>& b) {
   REQUIRE (a.Elements() == b.Elements());
   REQUIRE (a.Width() == b.Width());
 
@@ -17,20 +17,20 @@ static void CheckInverted(const hx::Block<>& a, const hx::Block<>& b) {
 
   char resultd[a.Size()];
 
-  hx::Block<> result(resultd, a.Width(), a.Elements());
+  cu::Block<> result(resultd, a.Width(), a.Elements());
 
   char sum[FIELD::WIDTH];
   char intermediate[FIELD::WIDTH];
 
   for (size_t i = 0; i < result.Elements(); i++) {
-    hx::Block<> ai = a.Sub(i, FIELD::WIDTH);
-    hx::Block<> ri = result.Sub(i, FIELD::WIDTH);
+    cu::Block<> ai = a.Sub(i, FIELD::WIDTH);
+    cu::Block<> ri = result.Sub(i, FIELD::WIDTH);
 
     for (size_t j = 0; j < result.Elements(); j++) {
       field.Value(0, sum);
 
       for (size_t k = 0; k < result.Elements(); k++) {
-        hx::Block<> bk = b.Sub(k, FIELD::WIDTH);
+        cu::Block<> bk = b.Sub(k, FIELD::WIDTH);
 
         field.Mul(ai(k), bk(j), intermediate);
         field.Add(sum, intermediate, sum);
@@ -48,7 +48,7 @@ static void CheckInverted(const hx::Block<>& a, const hx::Block<>& b) {
   field.Value(0, zero);
 
   for (size_t i = 0; i < result.Elements(); i++) {
-    hx::Block<> ri = result.Sub(i, FIELD::WIDTH);
+    cu::Block<> ri = result.Sub(i, FIELD::WIDTH);
 
     for (size_t j = 0; j < ri.Elements(); j++) {
       if (i == j) {
@@ -80,7 +80,7 @@ TEST_CASE ("Cauchy headers should generate properly.", "[hx::Headers::Cauchy]") 
 
   char ahd[a.OutputSize()];
 
-  hx::Block<> aheaders = a.Generate(hx::Block<>(ahd, a.OutputSize()));
+  cu::Block<> aheaders = a.Generate(cu::Block<>(ahd, a.OutputSize()));
 
   REQUIRE (aheaders.Elements() == 5);
   REQUIRE (aheaders.Width() == 3 * galois::Field::Rijndael::WIDTH);
@@ -93,14 +93,14 @@ TEST_CASE ("Cauchy headers should invert properly.", "[hx::Headers::Cauchy]") {
 
   char bhd[b.OutputSize()];
 
-  hx::Block<> bheaders = b.Generate(hx::Block<>(bhd, b.OutputSize()));
+  cu::Block<> bheaders = b.Generate(cu::Block<>(bhd, b.OutputSize()));
 
   REQUIRE (bheaders.Elements() == 5);
   REQUIRE (bheaders.Width() == 5 * galois::Field::Rijndael::WIDTH);
 
   char ibhd[b.OutputSize()];
 
-  hx::Block<> ibheaders = b.Invert(bheaders, hx::Block<>(ibhd, b.OutputSize()));
+  cu::Block<> ibheaders = b.Invert(bheaders, cu::Block<>(ibhd, b.OutputSize()));
 
   CheckInverted< galois::Field::Rijndael >(bheaders, ibheaders);
 }

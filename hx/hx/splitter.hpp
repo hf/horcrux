@@ -3,9 +3,11 @@
 #include <cstddef>
 #include <cassert>
 
+#include <vector>
+
 using namespace std;
 
-#include "block.hpp"
+#include <cu/block.hpp>
 
 namespace hx {
 
@@ -47,23 +49,29 @@ public:
     return split.Pieces() * PieceSize(block);
   }
 
-  Block<> Split(const Block<>& hdrs, const Block<>& in, const Block<>& out) const {
+  void Split(const cu::Block<>& hdrs, const cu::Block<>& in, const std::vector<char*>& outputs) const {
+    assert (outputs.size() == split.Pieces());
+
+    #ifndef NDEBUG
+    for (size_t i = 0; i < outputs.size(); i++) {
+      assert (outputs[i] != NULL);
+
+      volatile char touch = *(outputs[i] + OutputSize(in.Size()) - 1);
+      assert (touch >= 0 || touch <= 0);
+    }
+    #endif
+
     // check headers are [pieces x quorum] sized
     assert (hdrs.Size() == split.Pieces() * split.Quorum() * FieldWidth());
 
     // check at least one sequence of data
     assert (in.Size() >= split.Quorum() * FieldWidth());
 
-    // check that output can hold everything
-    assert (out.Size() == OutputSize(in.Size()));
-
-    Block<> headers = hdrs.Recast(split.Quorum() * FieldWidth());
-    Block<> input = in.Recast(split.Quorum() * FieldWidth());
-    Block<> output = out.Recast(PieceSize(input.Size()));
+    cu::Block<> headers = hdrs.Recast(split.Quorum() * FieldWidth());
+    cu::Block<> input = in.Recast(split.Quorum() * FieldWidth());
 
     assert (headers.Elements() == split.Pieces());
     assert (input.Elements() >= 1);
-    assert (output.Elements() == split.Pieces());
 
     typename SPLIT::FieldType field;
 
@@ -71,8 +79,8 @@ public:
     char ck[FieldWidth()];
 
     for (size_t i = 0; i < split.Pieces(); i++) {
-      Block<> header = headers.Sub(i, FieldWidth());
-      Block<> piece = output.Sub(i, FieldWidth());
+      cu::Block<> header = headers.Sub(i, FieldWidth());
+      cu::Block<> piece(outputs[i], FieldWidth(), PieceSize(in.Size()) / FieldWidth());
 
       assert (header.Elements()   == split.Quorum());
       assert (piece.Elements() == PieceSize(input.Size()) / FieldWidth());
@@ -80,7 +88,7 @@ public:
       assert (input.Elements() == piece.Elements());
 
       for (size_t k = 0; k < piece.Elements(); k++) {
-        Block<> sequence = input.Sub(k, FieldWidth());
+        cu::Block<> sequence = input.Sub(k, FieldWidth());
 
         assert (sequence.Elements() == split.Quorum());
 
@@ -96,6 +104,23 @@ public:
         field.Add(piece(k), ck, piece(k));
       }
     }
+
+  }
+
+  cu::Block<> Split(const cu::Block<>& hdrs, const cu::Block<>& in, const cu::Block<>& out) const {
+    assert (out.Size() == OutputSize(in.Size()));
+
+    cu::Block<> output = out.Recast(PieceSize(in.Size()));
+
+    assert (output.Elements() == split.Pieces());
+
+    std::vector<char*> outputs(output.Elements());
+
+    for (size_t i = 0; i < output.Elements(); i++) {
+      outputs[i] = output(i);
+    }
+
+    Split(hdrs, in, outputs);
 
     return output;
   }

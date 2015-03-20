@@ -3,6 +3,8 @@
 #include <cstddef>
 #include <cassert>
 
+#include <cu/block.hpp>
+
 using namespace std;
 
 namespace hx {
@@ -50,18 +52,18 @@ public:
     return pieces_size;
   }
 
-  inline size_t OutputSize(const Block<>& pieces) {
+  inline size_t OutputSize(const cu::Block<>& pieces) {
     return OutputSize(pieces.Size());
   }
 
-  Block<> Join(const Block<>& hdrs, const Block<>& pcs, const Block<>& out) const {
+  cu::Block<> Join(const cu::Block<>& hdrs, const cu::Block<>& pcs, const cu::Block<>& out) const {
     assert (hdrs.Size() == Pieces() * Quorum() * FieldWidth());
     assert (pcs.Size() % (Quorum() * FieldWidth()) == 0);
     assert (pcs.Size() == out.Size());
 
-    Block<> pieces = pcs.Recast(pcs.Size() / (Quorum() * FieldWidth()));
-    Block<> headers = hdrs.Recast(Quorum() * FieldWidth());
-    Block<> output = out.Recast(FieldWidth());
+    cu::Block<> pieces = pcs.Recast(pcs.Size() / (Quorum() * FieldWidth()));
+    cu::Block<> headers = hdrs.Recast(Quorum() * FieldWidth());
+    cu::Block<> output = out.Recast(FieldWidth());
 
     assert (pieces.Elements() == headers.Elements());
 
@@ -73,7 +75,7 @@ public:
       size_t i = j % Quorum();
       size_t k = j / Quorum();
 
-      Block<> header = headers.Sub(i, FieldWidth());
+      cu::Block<> header = headers.Sub(i, FieldWidth());
 
       field.Value(0, output(j));
 
@@ -82,7 +84,7 @@ public:
       for (size_t c = 0; c < pieces.Elements(); c++) {
         // TODO: Refactor this to use speedier SubGet method,
         // also for header(c)
-        Block<> piece = pieces.Sub(c, FieldWidth());
+        cu::Block<> piece = pieces.Sub(c, FieldWidth());
 
         field.Mul(header(c), piece(k), intermediate);
         field.Add(output(j), intermediate, output(j));

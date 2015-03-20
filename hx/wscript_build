@@ -1,6 +1,4 @@
 #!/bin/env python
 
-bld.shlib(target='hx',
-  export_includes='.',
-  use=['galois'],
-  source=bld.path.ant_glob('**/*.cpp'))
+bld(target='hx',
+  export_includes='.')

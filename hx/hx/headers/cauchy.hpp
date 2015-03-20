@@ -3,9 +3,10 @@
 #include <cstddef>
 #include <cassert>
 
+#include <cu/block.hpp>
+
 using namespace std;
 
-#include "../block.hpp"
 #include "invertor.hpp"
 
 namespace hx {
@@ -45,10 +46,10 @@ public:
     return split.Pieces() * split.Quorum() * FieldWidth();
   }
 
-  Block<> Generate(const Block<>& out) const {
+  cu::Block<> Generate(const cu::Block<>& out) const {
     assert (out.Size() == OutputSize());
 
-    Block<> output = out.Recast(split.Quorum() * FieldWidth());
+    cu::Block<> output = out.Recast(split.Quorum() * FieldWidth());
 
     typename SPLIT::FieldType field;
 
@@ -57,7 +58,7 @@ public:
     field.Value(1, one);
 
     for (size_t i = 0; i < output.Elements(); i++) {
-      Block<> row = output.Sub(i, FieldWidth());
+      cu::Block<> row = output.Sub(i, FieldWidth());
 
       for (size_t j = 0; j < row.Elements(); j++) {
         field.Value(i + j + 1, row(j));
@@ -72,12 +73,12 @@ public:
     return split.Pieces() == split.Quorum();
   }
 
-  Block<> Invert(const Block<>& hdrs, const Block<>& out) const {
+  cu::Block<> Invert(const cu::Block<>& hdrs, const cu::Block<>& out) const {
     Invertor<SPLIT> invertor(split);
 
     bool inverted = true;
 
-    Block<> result = invertor.Invert(hdrs, out, &inverted);
+    cu::Block<> result = invertor.Invert(hdrs, out, &inverted);
 
     assert (inverted);
 

@@ -5,12 +5,6 @@
 
 using namespace std;
 
-#include <boost/smart_ptr.hpp>
-
-using namespace boost;
-
-#include "block.hpp"
-
 namespace hx {
 
 template <class FIELD>
